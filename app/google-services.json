@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "322716408096",
+    "project_id": "disponibilidadtics",
+    "storage_bucket": "disponibilidadtics.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:322716408096:android:1f89a7a2c2938c1ebe5f45",
+        "android_client_info": {
+          "package_name": "mx.edu.utng.jdrj.disponibilidad"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBQYm8rCB1pjYPWIpc1bMUXY0CCDOsQoY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

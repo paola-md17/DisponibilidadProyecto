@@ -39,6 +39,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Pedir permiso de notificaciones (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -59,17 +60,22 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
 
+    // Instanciamos el Gestor de Notificaciones
     val notificationManager = remember { AppNotificationManager(context) }
 
     val loginViewModel: LoginViewModel = viewModel()
     val homeViewModel: HomeViewModel = viewModel()
     val reservaViewModel: ReservaViewModel = viewModel()
     val adminViewModel: AdminViewModel = viewModel()
-    val statisticsViewModel: StatisticsViewModel = viewModel() // ViewModel para gráficas
+    val statisticsViewModel: StatisticsViewModel = viewModel()
 
     val usuario = loginViewModel.usuarioActual
+
+    // Lógica de notificaciones en tiempo real
     LaunchedEffect(usuario) {
         if (usuario != null) {
+            notificationManager.iniciarEscuchaPerfil(usuario.idUsuario)
+
             if (usuario.rol == "admin") {
                 notificationManager.iniciarEscuchaAdmin(usuario)
             } else {
@@ -100,11 +106,15 @@ fun AppNavigation() {
             )
         }
 
-        // 2. REGISTRO
+        // 2. REGISTRO (AQUÍ ESTÁ LA MAGIA)
         composable("register") {
             RegisterScreen(
                 viewModel = loginViewModel,
                 onRegisterSuccess = {
+                    // --- 🔔 LANZAMOS LA NOTIFICACIÓN DE BIENVENIDA AQUÍ ---
+                    notificationManager.notificarBienvenida()
+
+                    // Navegar al Login
                     navController.navigate("login") {
                         popUpTo("register") { inclusive = true }
                     }
@@ -113,7 +123,7 @@ fun AppNavigation() {
             )
         }
 
-        // 3. HOME ALUMNO / ADMIN (Selector)
+        // 3. HOME
         composable("home") {
             HomeScreen(
                 viewModel = homeViewModel,
@@ -142,11 +152,11 @@ fun AppNavigation() {
                 onIrAUsuarios = { navController.navigate("admin_users") },
                 onIrAGestionEspacios = { navController.navigate("admin_spaces") },
                 onIrAPerfil = { navController.navigate("profile") },
-                onIrAEstadisticas = { navController.navigate("statistics") } // Conectado
+                onIrAEstadisticas = { navController.navigate("statistics") }
             )
         }
 
-        // 7. USUARIOS
+        // 7. GESTIÓN DE USUARIOS
         composable("admin_users") {
             UserManagementScreen(
                 adminViewModel = adminViewModel,
@@ -170,11 +180,9 @@ fun AppNavigation() {
             )
         }
 
-        // 10. ESTADÍSTICAS (Ruta que faltaba)
+        // 10. ESTADÍSTICAS
         composable("statistics") {
-            // Calculamos al entrar
             LaunchedEffect(Unit) { statisticsViewModel.calcularEstadisticas() }
-
             StatisticsScreen(
                 viewModel = statisticsViewModel,
                 onNavigateBack = { navController.popBackStack() }
